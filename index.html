@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+    <title>Indian Airsheds Map</title>
+<!-- Web Fonts-->
+<link href="https://fonts.googleapis.com/css?family=Poppins:400,500,600%7cPlayfair+Display:400i" rel="stylesheet">
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<!-- Plugins-->
+<link href="assets/css/plugins.min.css" rel="stylesheet">
+<!-- Template core CSS-->
+<link href="assets/css/template.css" rel="stylesheet">
+<link rel="shortcut icon" href="https://raw.githubusercontent.com/geominr/geominr/master/assets/images/geominr_globe.png">
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.css' rel='stylesheet' />
+    
+</head>
+<body>
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.4.2/mapbox-gl-geocoder.min.js"></script>
+<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.4.2/mapbox-gl-geocoder.css" type="text/css"/>
+<!-- Promise polyfill script required to use Mapbox GL Geocoder in IE 11 -->
+<script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
+<style>
+body {
+	color:#404040;
+	margin:0;
+	padding:0;
+	-webkit-font-smoothing:antialiased;
+  }
+
+  * {
+	-webkit-box-sizing:border-box;
+	-moz-box-sizing:border-box;
+	box-sizing:border-box;
+  }
+
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: transparent; 
+  box-shadow: inset 0 0 5px grey; 
+  border-radius: 10px;
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #ee982f; 
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #ee982f; 
+}
+	
+.mapboxgl-popup {
+max-width: 400px;
+
+}
+body {
+  margin: 0;
+  padding: 0;
+}
+h2,
+h3,
+h1 {
+  padding-top: 20px;
+  margin: 0px;
+}
+
+
+p {
+  font-size: 0.85em;
+  margin: 10px;
+  text-align: left;
+}
+
+/**
+* Create a position for the map
+* on the page */
+.sidebar {
+	position:absolute;
+	width:33.3333%;
+	height:100%;
+	padding-left: 0px;
+	top:0;left:0;
+	overflow-y: scroll;
+	border-right:1px solid rgba(0,0,0,0.25);
+}
+
+#map {
+	position:absolute;
+	left:33.3333%;
+	width:66.6666%;
+	top:0;bottom:0;
+}
+
+.heading {
+	background:#fff;
+	border-bottom:1px solid #eee;
+	height: 100px;
+	min-height:60px;
+	line-height:60px;
+	padding:0 0px;
+	background-color: #18aa13;
+	color: #fff;
+  }
+	
+#description {
+	margin: 10px;
+}
+
+#features {
+	margin-bottom: 40px;
+}
+	
+</style>
+<div class='sidebar'>
+  <div class='heading'>
+    <center><h3>Ambient Air Quality Monitoring</h3>
+	<h6>National Clean Air Programme (NCAP) of India</h6></center>
+  </div>
+  <div id='description'>
+  <div id="logo">
+  <a href="https://urbanemissions.info/"><img src="assets/images/logo.grid_.3.png" style="height:45px"></a>
+  </div>
+	<small><!--Irrespective of the monitoring approaches and equipment, the initiation process requires an understanding of 
+		the pollution loads, mix of sources, and geography of the city to decide how much to monitor for better spatial 
+		representation and how many times to monitor for better temporal representation. -->
+		In this map, we define (a) the size of NCAP city airsheds (b) the recommended number of ambient air quality 
+		monitoring sites in an airshed (c) the operational sampling frequency to support receptor-based source apportionment 
+		studies. These resources are necessary for strengthening the monitoring needs of an airshed to track pollution levels, 
+		to conduct receptor-model-based source apportionment studies, and to support long-term air quality management plans.</small>
+		
+	  	<h6 style="color:black">Click on a point to view local airshed data</h6>
+	  
+  </div>
+  <div id="features">
+	  
+  </div>
+  
+</div>
+<div id="map"></div>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+	mapboxgl.accessToken = 'pk.eyJ1IjoicmFhbmFuLWciLCJhIjoiY2pyMWF5YzM4MDBseTQzcXEyZ3gxN2xvOSJ9.Jm_gHZ3zcJh2xygKeOdr5w';
+    
+    var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/raanan-g/ckl9ntogg145x17pt2xem0m2y',
+        center: [79.915048, 21.362872],
+        zoom: 4.3
+    });
+    console.log(map)
+    map.addControl(
+        new MapboxGeocoder({
+        accessToken: mapboxgl.accessToken,
+        mapboxgl: mapboxgl
+    }));
+    map.addControl(new mapboxgl.NavigationControl()); 
+    
+    map.on('load', function() {
+    
+	var format0 = d3.format(",.0f");
+	function counter(x, title, size) {
+	return "<div class=\"col-md-"+size+"\">\
+				<center><div class=\"counter-number\">\
+				   <h2 style=\"color:#18aa13; margin:0px; padding-top:5px\"><strong>"+x+"</strong></h2>\
+				</div>\
+			   <small>"+title+"</small></center>\
+			</div>";
+	}
+		
+    map.on('click', 'ncap-airsheds-info-2-4r7w53', function(e) {
+        
+        //console.log(e.features)
+        var popupdata = "";
+        for (i in e.features){
+			
+			var airshed = e.features[i].properties["Airshed"];
+			var state = e.features[i].properties["State"];
+			
+			var airshedsize = counter(e.features[i].properties["Airshed size"], "Airshed Size", 4);
+			var totalpop = counter(e.features[i].properties["Total population"], "Total population (millions)", 4);
+			var urbanpopshare = counter(e.features[i].properties["Urban pop%"], "Urban population", 4);
+			var urbanareashare = counter(e.features[i].properties["Urban area%"], "Urban area", 4);
+			var maxpopdensity = counter(format0(e.features[i].properties["max.pop.density"]), 
+										"Max. pop. density (persons/km<sup>2</sup>)", 4);
+			var avgpopdensity = counter(format0(e.features[i].properties["urb.pop.density"]), 
+										"Avg. pop. density (persons/km<sup>2</sup>)", 4);
+			
+			var pm = counter(e.features[i].properties["PM-Monitors"], "Particulate matter", 3);
+			var so2 = counter(e.features[i].properties["SO2-Monitors"], "Sulfur dioxide", 3);
+			var no2 = counter(e.features[i].properties["NO2-Monitors"], "Nitrogen dioxide", 3);
+			var co = counter(e.features[i].properties["CO & Others Monitors"], "Carbon Monoxide", 3);
+			
+			popupdata = popupdata + "<center><h3 style='color:#00853e; padding-top:0px'>"+airshed+", "+state+"</h3></center>";
+			popupdata = popupdata +"<br><center><h6 style='color:#ee982f'>City data</h6></center>"
+
+			popupdata = popupdata +"<div class='container' style='padding:0px 20px'><div class='row'>" + airshedsize + urbanareashare + maxpopdensity + "</div>";
+			popupdata = popupdata +"<div class='row'>" + totalpop +urbanpopshare + avgpopdensity + "</div>";
+			
+			popupdata = popupdata +"<br><center><h6 style='color:#ee982f'>Minimum air monitors needed</h6></center>"
+			popupdata = popupdata +"<div class='row'>" + pm + so2 + no2 + co +"</div></div>";
+        }
+        
+        var coordinates = e.features[0].geometry.coordinates.slice();
+        
+
+        // Ensure that if the map is zoomed out such that multiple
+        // copies of the feature are visible, the popup appears
+        // over the copy being pointed to.
+        while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+            coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+        }
+        
+        //new mapboxgl.Popup({anchor:'right'}).setLngLat(coordinates).setHTML(popupdata).addTo(map);
+        
+        document.getElementById('features').innerHTML = popupdata;
+        
+    });
+
+    // Change the cursor to a pointer when the mouse is over the places layer.
+    map.on('mouseenter', 'ncap-airsheds-info-2-4r7w53', function() {
+        map.getCanvas().style.cursor = 'pointer';
+    });
+
+    // Change it back to a pointer when it leaves.
+    map.on('mouseleave', 'ncap-airsheds-info-2-4r7w53', function() {
+        map.getCanvas().style.cursor = '';
+    });    
+    
+    });
+    </script>
+	<!-- Scripts-->
+	<script src="assets/js/custom/jquery-3.2.1.min.js"></script>
+	<script src="assets/js/custom/popper.min.js"></script>
+	<script src="assets/js/bootstrap/bootstrap.min.js"></script>
+	<script src="assets/js/custom/plugins.min.js"></script>
+	<script src="assets/js/custom/custom.min.js"></script>
+ 
+</body>
+</html>
