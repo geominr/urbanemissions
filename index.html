@@ -85,7 +85,7 @@ p {
 * on the page */
 .sidebar {
 	position:absolute;
-	width:33.3333%;
+	width: 470px;
 	height:100%;
 	padding-left: 0px;
 	top:0;left:0;
@@ -95,8 +95,8 @@ p {
 
 #map {
 	position:absolute;
-	left:33.3333%;
-	width:66.6666%;
+	left:470px;
+	width:67%;
 	top:0;bottom:0;
 }
 
@@ -104,14 +104,17 @@ p {
 	background:#fff;
 	border-bottom:1px solid #eee;
 	height: 100px;
-	min-height:60px;
-	line-height:60px;
+	min-height:100px;
+	line-height:140px;
+	width: inherit;
 	padding:0 0px;
 	background-color: #18aa13;
 	color: #fff;
+	position: fixed;
   }
 	
 #description {
+	padding-top: 100px;
 	margin: 10px;
 }
 
@@ -119,33 +122,48 @@ p {
 	margin-bottom: 40px;
 }
 	
+#logo {
+	position: absolute;
+	bottom: 20px;
+	right: 0px;
+}
+	
 </style>
 <div class='sidebar'>
   <div class='heading'>
     <center><h3>Ambient Air Quality Monitoring</h3>
-	<h6>National Clean Air Programme (NCAP) of India</h6></center>
+	<h6>
+	  <a href="https://urbanemissions.info/">UrbanEmissons.info</a> •
+		  <a href="https://urbanemissions.info/blog-pieces/india-ncap-review/#sim-40-2021">NCAP Review Study</a> • 
+		  <a href="https://urbanemissions.info/wp-content/uploads/docs/SIM-40-2021.pdf">Download Study</a>
+		</h6>
+	  </center>
+	  
+	
   </div>
   <div id='description'>
-  <div id="logo">
-  <a href="https://urbanemissions.info/"><img src="assets/images/logo.grid_.3.png" style="height:45px"></a>
-  </div>
+  <!--
 	<small><!--Irrespective of the monitoring approaches and equipment, the initiation process requires an understanding of 
 		the pollution loads, mix of sources, and geography of the city to decide how much to monitor for better spatial 
-		representation and how many times to monitor for better temporal representation. -->
+		representation and how many times to monitor for better temporal representation. 
 		In this map, we define (a) the size of NCAP city airsheds (b) the recommended number of ambient air quality 
 		monitoring sites in an airshed (c) the operational sampling frequency to support receptor-based source apportionment 
 		studies. These resources are necessary for strengthening the monitoring needs of an airshed to track pollution levels, 
-		to conduct receptor-model-based source apportionment studies, and to support long-term air quality management plans.</small>
-		
-	  	<h6 style="color:black">Click on a point to view local airshed data</h6>
+		to conduct receptor-model-based source apportionment studies, and to support long-term air quality management plans.</small>-->
+		<hr>
 	  
   </div>
   <div id="features">
-	  
+	  <center>
+	  <h6 style="color:black">Click on a point to view local airshed data</h6>
+	  </center>
   </div>
   
 </div>
 <div id="map"></div>
+<div id="logo">
+  <a href="https://urbanemissions.info/"><img src="assets/images/logo.grid_.3.png" style="height:45px"></a>
+  </div>
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script>
 	mapboxgl.accessToken = 'pk.eyJ1IjoicmFhbmFuLWciLCJhIjoiY2pyMWF5YzM4MDBseTQzcXEyZ3gxN2xvOSJ9.Jm_gHZ3zcJh2xygKeOdr5w';
@@ -192,7 +210,7 @@ p {
 			var maxpopdensity = counter(format0(e.features[i].properties["max.pop.density"]), 
 										"Max. pop. density (persons/km<sup>2</sup>)", 4);
 			var avgpopdensity = counter(format0(e.features[i].properties["urb.pop.density"]), 
-										"Avg. pop. density (persons/km<sup>2</sup>)", 4);
+										"Avg. urban pop. density (persons/km<sup>2</sup>)", 4);
 			
 			var pm = counter(e.features[i].properties["PM-Monitors"], "Particulate matter", 3);
 			var so2 = counter(e.features[i].properties["SO2-Monitors"], "Sulfur dioxide", 3);
@@ -200,7 +218,7 @@ p {
 			var co = counter(e.features[i].properties["CO & Others Monitors"], "Carbon Monoxide", 3);
 			
 			popupdata = popupdata + "<center><h3 style='color:#00853e; padding-top:0px'>"+airshed+", "+state+"</h3></center>";
-			popupdata = popupdata +"<br><center><h6 style='color:#ee982f'>City data</h6></center>"
+			popupdata = popupdata +"<hr><center><h6 style='color:#ee982f'>City data</h6></center>"
 
 			popupdata = popupdata +"<div class='container' style='padding:0px 20px'><div class='row'>" + airshedsize + urbanareashare + maxpopdensity + "</div>";
 			popupdata = popupdata +"<div class='row'>" + totalpop +urbanpopshare + avgpopdensity + "</div>";
