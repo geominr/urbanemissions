@@ -13,7 +13,8 @@
 <link rel="shortcut icon" href="https://raw.githubusercontent.com/geominr/geominr/master/assets/images/geominr_globe.png">
 <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
 <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.js'></script>
-    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.css' rel='stylesheet' />
+<script src='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.js'></script>
+<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.css' rel='stylesheet' />
     
 </head>
 <body>
@@ -164,7 +165,8 @@ p {
 <div id="logo">
   <a href="https://urbanemissions.info/"><img src="assets/images/logo.grid_.3.png" style="height:45px"></a>
   </div>
-<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src='https://api.mapbox.com/mapbox.js/plugins/turf/v2.0.2/turf.min.js'></script>
 <script>
 	mapboxgl.accessToken = 'pk.eyJ1IjoicmFhbmFuLWciLCJhIjoiY2pyMWF5YzM4MDBseTQzcXEyZ3gxN2xvOSJ9.Jm_gHZ3zcJh2xygKeOdr5w';
     
@@ -175,7 +177,61 @@ p {
         zoom: 4.3
     });
     console.log(map)
-    map.addControl(
+    
+	function zoomToMap(url) {
+		
+		var layers = map.getStyle().layers;
+		// Find the index of the first symbol layer in the map style
+		var firstSymbolId;
+		for (var i = 0; i < layers.length; i++) {
+			if (layers[i].type === 'symbol') {
+				firstSymbolId = layers[i].id;
+				break;
+			}
+		}	
+		
+		json = d3.json(url).then(function(data){ 
+			
+			//console.log(data) 
+				
+			if (gridShowing == true) {
+				var airshedLayer = map.getLayer('airshed_layer');
+				if (typeof airshedLayer !== 'undefined'){
+					map.removeLayer('airshed_layer');
+				}
+				if (typeof map.getSource('airshed_source') !== 'undefined') {
+					map.removeSource('airshed_source');	
+				}
+			}
+												
+			var bbox = turf.extent(data);
+		
+			map.fitBounds(bbox);
+
+			map.addSource("airshed_source", {
+				type: "geojson",
+				data: data,
+			});
+
+			map.addLayer({
+				"id": "airshed_layer",
+				"type":"line",
+				"source":"airshed_source",
+				"paint": {
+					"line-color":"#fcba03",
+					"line-width":0.5,
+					"line-opacity":0.25
+					}
+				},
+				firstSymbolId
+			);
+											   
+		});
+		gridShowing = true;
+	}
+
+	
+	map.addControl(
         new MapboxGeocoder({
         accessToken: mapboxgl.accessToken,
         mapboxgl: mapboxgl
@@ -227,6 +283,14 @@ p {
 			popupdata = popupdata +"<div class='row'>" + pm + so2 + no2 + co +"</div></div>";
         }
         
+		var url_path = "https://raw.githubusercontent.com/geominr/urbanemissions/main/geojson/" + e.features[0].properties["Google Earth KML file"];
+		
+		url_path = url_path.replace(".kml",".geojson")
+		
+		console.log(url_path);
+		zoomToMap(url_path);
+		
+		
         var coordinates = e.features[0].geometry.coordinates.slice();
         
 
