@@ -74,7 +74,6 @@ h1 {
   margin: 0px;
 }
 
-
 p {
   font-size: 0.85em;
   margin: 10px;
@@ -84,23 +83,25 @@ p {
 /**
 * Create a position for the map
 * on the page */
-.sidebar {
+.map-header {
 	position:absolute;
-	width: 470px;
-	height:100%;
+	width: 100%;
+	height:16%;
 	padding-left: 0px;
-	top:0;left:0;
-	overflow-y: scroll;
-	border-right:1px solid rgba(0,0,0,0.25);
+	top:0;
+	bottom:90%;
+/*	overflow-y: scroll;*/
+	border-bottom:1px solid rgba(0,0,0,0.25);
 }
 
 #map {
 	position:absolute;
-	left:470px;
-	width:67%;
-	top:0;bottom:0;
+	left:0;
+	width:100%;
+	top:16%;bottom:0;
 }
 
+/*
 .heading {
 	background:#fff;
 	border-bottom:1px solid #eee;
@@ -113,6 +114,7 @@ p {
 	color: #fff;
 	position: fixed;
   }
+*/
 	
 #description {
 	padding-top: 100px;
@@ -120,206 +122,72 @@ p {
 }
 
 #features {
-	margin-bottom: 40px;
+/*	margin-bottom: 40px;*/
+	width:100%
 }
 	
-#logo {
-	position: absolute;
-	bottom: 20px;
-	right: 0px;
-}
+
 	
 </style>
-<div class='sidebar'>
-  <div class='heading'>
+<div class='map-header'>
+	<div class="row" style="height:100%">
+		
+		
+		<div class="col-md-2" style="left: 20px" id="logo">
+			<a href="https://urbanemissions.info/" style="position: static; height:100%">
+			 <img src="assets/images/logo.grid_.3.png" style="height:12%; padding-top: 20px">
+			</a>
+			<center><small>
+			  <a href="https://urbanemissions.info/blog-pieces/india-ncap-review/#sim-40-2021" style="color: #ee982f">NCAP Review</a> • 
+			  <a href="https://urbanemissions.info/wp-content/uploads/docs/SIM-40-2021.pdf" style="color: #ee982f">Download Study</a><br> 
+			  <a href="https://urbanemissions.info/wp-content/uploads/docs/SIM-40-2021.pdf" style="color: #ee982f">Learn More</a>
+			</small></center>
+		</div>
+		<!-- To Do 
+			script: #logo -> if screen is > 1088px then go to bottom left
+		-->
+		
+		
+		<div class="col-md-10">
+			<div id="features">
+			  <h4 style="color:black; padding-top: 20px">Click on a point to view local airshed data</h4>
+			  
+			</div>
+		</div>
+		
+	</div>
+	
+  <!--<div class='heading'>
     <center><h3>Ambient Air Quality Monitoring</h3>
-	<h6>
-	  <a href="https://urbanemissions.info/">UrbanEmissons.info</a> •
-		  <a href="https://urbanemissions.info/blog-pieces/india-ncap-review/#sim-40-2021">NCAP Review Study</a> • 
-		  <a href="https://urbanemissions.info/wp-content/uploads/docs/SIM-40-2021.pdf">Download Study</a>
-		</h6>
+	
 	  </center>
 	  
 	
   </div>
   <div id='description'>
-  <!--
+  
 	<small><!--Irrespective of the monitoring approaches and equipment, the initiation process requires an understanding of 
 		the pollution loads, mix of sources, and geography of the city to decide how much to monitor for better spatial 
 		representation and how many times to monitor for better temporal representation. 
 		In this map, we define (a) the size of NCAP city airsheds (b) the recommended number of ambient air quality 
 		monitoring sites in an airshed (c) the operational sampling frequency to support receptor-based source apportionment 
 		studies. These resources are necessary for strengthening the monitoring needs of an airshed to track pollution levels, 
-		to conduct receptor-model-based source apportionment studies, and to support long-term air quality management plans.</small>-->
+		to conduct receptor-model-based source apportionment studies, and to support long-term air quality management plans.</small>
 		<hr>
 	  
   </div>
-  <div id="features">
-	  <center>
-	  <h6 style="color:black">Click on a point to view local airshed data</h6>
-	  </center>
-  </div>
+  -->
   
 </div>
 <div id="map"></div>
-<div id="logo">
-  <a href="https://urbanemissions.info/"><img src="assets/images/logo.grid_.3.png" style="height:45px"></a>
-  </div>
-<script src="https://d3js.org/d3.v5.min.js"></script>
-<script src='https://api.mapbox.com/mapbox.js/plugins/turf/v2.0.2/turf.min.js'></script>
-<script>
-	mapboxgl.accessToken = 'pk.eyJ1IjoicmFhbmFuLWciLCJhIjoiY2pyMWF5YzM4MDBseTQzcXEyZ3gxN2xvOSJ9.Jm_gHZ3zcJh2xygKeOdr5w';
-    
-    var map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/raanan-g/ckl9ntogg145x17pt2xem0m2y',
-        center: [79.915048, 21.362872],
-        zoom: 4.3
-    });
-    console.log(map)
-    
-	function zoomToMap(url) {
-		
-		var layers = map.getStyle().layers;
-		// Find the index of the first symbol layer in the map style
-		var firstSymbolId;
-		for (var i = 0; i < layers.length; i++) {
-			if (layers[i].type === 'symbol') {
-				firstSymbolId = layers[i].id;
-				break;
-			}
-		}	
-		
-		json = d3.json(url).then(function(data){ 
-			
-			//console.log(data) 
-				
-			if (gridShowing == true) {
-				var airshedLayer = map.getLayer('airshed_layer');
-				if (typeof airshedLayer !== 'undefined'){
-					map.removeLayer('airshed_layer');
-				}
-				if (typeof map.getSource('airshed_source') !== 'undefined') {
-					map.removeSource('airshed_source');	
-				}
-			}
-												
-			var bbox = turf.extent(data);
-		
-			map.fitBounds(bbox);
-
-			map.addSource("airshed_source", {
-				type: "geojson",
-				data: data,
-			});
-
-			map.addLayer({
-				"id": "airshed_layer",
-				"type":"line",
-				"source":"airshed_source",
-				"paint": {
-					"line-color":"#fcba03",
-					"line-width":0.5,
-					"line-opacity":0.25
-					}
-				},
-				firstSymbolId
-			);
-											   
-		});
-		gridShowing = true;
-	}
+	
+	
 
 	
-	map.addControl(
-        new MapboxGeocoder({
-        accessToken: mapboxgl.accessToken,
-        mapboxgl: mapboxgl
-    }));
-    map.addControl(new mapboxgl.NavigationControl()); 
-    
-    map.on('load', function() {
-    
-	var format0 = d3.format(",.0f");
-	function counter(x, title, size) {
-	return "<div class=\"col-md-"+size+"\">\
-				<center><div class=\"counter-number\">\
-				   <h2 style=\"color:#18aa13; margin:0px; padding-top:5px\"><strong>"+x+"</strong></h2>\
-				</div>\
-			   <small>"+title+"</small></center>\
-			</div>";
-	}
-		
-    map.on('click', 'ncap-airsheds-info-2-4r7w53', function(e) {
-        
-        //console.log(e.features)
-        var popupdata = "";
-        for (i in e.features){
-			
-			var airshed = e.features[i].properties["Airshed"];
-			var state = e.features[i].properties["State"];
-			
-			var airshedsize = counter(e.features[i].properties["Airshed size"], "Airshed Size", 4);
-			var totalpop = counter(e.features[i].properties["Total population"], "Total population (millions)", 4);
-			var urbanpopshare = counter(e.features[i].properties["Urban pop%"], "Urban population", 4);
-			var urbanareashare = counter(e.features[i].properties["Urban area%"], "Urban area", 4);
-			var maxpopdensity = counter(format0(e.features[i].properties["max.pop.density"]), 
-										"Max. pop. density (persons/km<sup>2</sup>)", 4);
-			var avgpopdensity = counter(format0(e.features[i].properties["urb.pop.density"]), 
-										"Avg. urban pop. density (persons/km<sup>2</sup>)", 4);
-			
-			var pm = counter(e.features[i].properties["PM-Monitors"], "Particulate matter", 3);
-			var so2 = counter(e.features[i].properties["SO2-Monitors"], "Sulfur dioxide", 3);
-			var no2 = counter(e.features[i].properties["NO2-Monitors"], "Nitrogen dioxide", 3);
-			var co = counter(e.features[i].properties["CO & Others Monitors"], "Carbon Monoxide", 3);
-			
-			popupdata = popupdata + "<center><h3 style='color:#00853e; padding-top:0px'>"+airshed+", "+state+"</h3></center>";
-			popupdata = popupdata +"<hr><center><h6 style='color:#ee982f'>City data</h6></center>"
-
-			popupdata = popupdata +"<div class='container' style='padding:0px 20px'><div class='row'>" + airshedsize + urbanareashare + maxpopdensity + "</div>";
-			popupdata = popupdata +"<div class='row'>" + totalpop +urbanpopshare + avgpopdensity + "</div>";
-			
-			popupdata = popupdata +"<br><center><h6 style='color:#ee982f'>Minimum air monitors needed</h6></center>"
-			popupdata = popupdata +"<div class='row'>" + pm + so2 + no2 + co +"</div></div>";
-        }
-        
-		var url_path = "https://raw.githubusercontent.com/geominr/urbanemissions/main/geojson/" + e.features[0].properties["Google Earth KML file"];
-		
-		url_path = url_path.replace(".kml",".geojson")
-		
-		console.log(url_path);
-		zoomToMap(url_path);
-		
-		
-        var coordinates = e.features[0].geometry.coordinates.slice();
-        
-
-        // Ensure that if the map is zoomed out such that multiple
-        // copies of the feature are visible, the popup appears
-        // over the copy being pointed to.
-        while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-            coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-        }
-        
-        //new mapboxgl.Popup({anchor:'right'}).setLngLat(coordinates).setHTML(popupdata).addTo(map);
-        
-        document.getElementById('features').innerHTML = popupdata;
-        
-    });
-
-    // Change the cursor to a pointer when the mouse is over the places layer.
-    map.on('mouseenter', 'ncap-airsheds-info-2-4r7w53', function() {
-        map.getCanvas().style.cursor = 'pointer';
-    });
-
-    // Change it back to a pointer when it leaves.
-    map.on('mouseleave', 'ncap-airsheds-info-2-4r7w53', function() {
-        map.getCanvas().style.cursor = '';
-    });    
-    
-    });
-    </script>
 	<!-- Scripts-->
+	<script src="https://d3js.org/d3.v5.min.js"></script>
+	<script src='https://api.mapbox.com/mapbox.js/plugins/turf/v2.0.2/turf.min.js'></script>
+	<script src='assets/js/airsheds.js'></script>
 	<script src="assets/js/custom/jquery-3.2.1.min.js"></script>
 	<script src="assets/js/custom/popper.min.js"></script>
 	<script src="assets/js/bootstrap/bootstrap.min.js"></script>
