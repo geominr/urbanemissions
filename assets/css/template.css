@@ -91,7 +91,7 @@ body {
     font-family: "Poppins", Arial;
     font-size: .875rem;
     font-weight: 400;
-    line-height: 1.8;
+/*    line-height: 1.8;*/
     color: #fcfeff;
     text-align: left;
     background-color: #fff;
@@ -478,8 +478,8 @@ hr {
 
 small,
 .small {
-    font-size: 80%;
-    font-weight: 400;
+    font-size: 70%;
+    font-weight: 600;
 }
 
 mark,
