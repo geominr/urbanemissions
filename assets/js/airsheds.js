@@ -59,8 +59,15 @@ function zoomToMap(url) {
 	});
 	gridShowing = true;
 }
-
-
+var format0 = d3.format(",.0f");
+function counter(x, title, size) {
+return "<div class=\"col-md-"+size+"\">\
+			<center><div class=\"counter-number\">\
+			   <h1 style=\"color:#18aa13; margin:0px; padding-top:5px\"><strong>"+x+"</strong></h1>\
+			</div>\
+		   <small style=\"position:inline-block\">"+title+"</small></center>\
+		</div>";
+}
 map.addControl(
 	new MapboxGeocoder({
 	accessToken: mapboxgl.accessToken,
@@ -69,17 +76,6 @@ map.addControl(
 map.addControl(new mapboxgl.NavigationControl()); 
 
 map.on('load', function() {
-
-var format0 = d3.format(",.0f");
-function counter(x, title, size) {
-return "<div class=\"col-md-"+size+"\">\
-			<center><div class=\"counter-number\">\
-			   <h4 style=\"color:#18aa13; margin:0px; padding-top:5px\"><strong>"+x+"</strong></h4>\
-			</div>\
-		   <small style=\"position:inline-block\">"+title+"</small></center>\
-		</div>";
-}
-
 map.on('click', 'ncap-airsheds-info-2-4r7w53', function(e) {
 
 	//console.log(e.features)
@@ -98,14 +94,7 @@ map.on('click', 'ncap-airsheds-info-2-4r7w53', function(e) {
 	var avgpopdensity = counter(format0(e.features[i].properties["urb.pop.density"]), 
 								"Avg. urban pop. density (persons/km<sup>2</sup>)", 2);
 
-	var pm = "<strong style='color:#ee982f'>" + String(e.features[i].properties["PM-Monitors"]) + "</strong> <small>Particulate matter</small>";
-	var so2 = "<strong style='color:#ee982f'>" + String(e.features[i].properties["SO2-Monitors"])+ "</strong> <small>Sulfur dioxide</small>";
-	var no2 = "<strong style='color:#ee982f'>" + String(e.features[i].properties["NO2-Monitors"])+ "</strong> <small>Nitrogen dioxide</small>";
-	var co = "<strong style='color:#ee982f'>" + String(e.features[i].properties["CO & Others Monitors"])+ "</strong> <small>Carbon Monoxide</small>";
-
 	popupdata = popupdata +"<p><h5 style='color:#00853e; padding-top:0px; margin-bottom:0px; display:inline-block'>"+airshed+", "+state+"</h5>";
-	popupdata = popupdata +"&nbsp;&nbsp;&nbsp;<h6 style='color:#00853e; padding-top:0px; margin-bottom:0px; display:inline-block'>  - &nbsp;&nbsp;&nbsp; Minimum air monitors needed: " + pm + " " + so2 + " " + no2 + " " + co + "</h6></p>"
-
 	popupdata = popupdata +`<div class='container' style='height:100%'>
 					<div class='row'>` + totalpop + urbanpopshare + urbanareashare + avgpopdensity +  maxpopdensity +  airshedsize + `
 					</div>
@@ -122,23 +111,44 @@ map.on('click', 'ncap-airsheds-info-2-4r7w53', function(e) {
 
 	var coordinates = e.features[0].geometry.coordinates.slice();
 
+	var pm = counter(String(e.features[0].properties["PM-Monitors"]), 
+								"Particulate Matter", 6);
+	var so2 = counter(String(e.features[0].properties["SO2-Monitors"]), 
+								"Sulfur Dioxide", 6);
+	var no2 = counter(String(e.features[0].properties["NO2-Monitors"]), 
+								"Nitrogen Dioxide", 6);
+	var co = counter(String(e.features[0].properties["CO & Others Monitors"]), 
+								"Carbon Monoxide", 6);
 
+	popup_data = `<div class='row'>` + pm + so2 + no2 + co + `
+					</div><center><h6>Recommended Monitoring Stations</h6></center>`;
+	
+	   
 	// Ensure that if the map is zoomed out such that multiple
 	// copies of the feature are visible, the popup appears
 	// over the copy being pointed to.
 	while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-		coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+	coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
 	}
 
-	//new mapboxgl.Popup({anchor:'right'}).setLngLat(coordinates).setHTML(popupdata).addTo(map);
-
+	// Populate the popup and set its coordinates
+	// based on the feature found.
+	popup.setLngLat(coordinates).setHTML(popup_data).addTo(map);
 	document.getElementById('features').innerHTML = popupdata;
 
 });
-
+// Create a popup, but don't add it to the map yet.
+var popup = new mapboxgl.Popup({
+	offset: 10,
+	closeButton: true,
+	closeOnClick: false
+});
 // Change the cursor to a pointer when the mouse is over the places layer.
-map.on('mouseenter', 'ncap-airsheds-info-2-4r7w53', function() {
+// Change the cursor to a pointer when the mouse is over the places layer.
+map.on('mouseenter', 'ncap-airsheds-info-2-4r7w53', function(e) {
 	map.getCanvas().style.cursor = 'pointer';
+	
+	
 });
 
 // Change it back to a pointer when it leaves.
